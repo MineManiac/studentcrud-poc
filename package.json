@@ -5,7 +5,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node --watch src/server.js"
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "node --watch src/server.js",
+    "dev:client": "vite --config client/vite.config.mjs",
+    "build": "vite build --config client/vite.config.mjs",
+    "preview": "vite preview --config client/vite.config.mjs"
   },
   "keywords": [
     "crud",
@@ -18,7 +22,14 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "mongodb": "^7.2.0",
-    "mongoose": "^8.9.5"
+    "mongoose": "^8.9.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "vite": "^6.0.7"
   },
   "engines": {
     "node": ">=20"

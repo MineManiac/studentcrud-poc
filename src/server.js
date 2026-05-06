@@ -1,3 +1,4 @@
+const fs = require("fs");
 const path = require("path");
 
 const dotenv = require("dotenv");
@@ -9,6 +10,7 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const mongoUri = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/studentcrud";
+const clientDistPath = path.join(__dirname, "..", "client", "dist");
 const validBrazilStates = new Set([
   "AC",
   "AL",
@@ -40,7 +42,7 @@ const validBrazilStates = new Set([
 ]);
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(clientDistPath));
 
 const counterSchema = new mongoose.Schema(
   {
@@ -322,6 +324,19 @@ app.delete("/api/students/:id", async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) {
+    return next();
+  }
+
+  const indexPath = path.join(clientDistPath, "index.html");
+  if (!fs.existsSync(indexPath)) {
+    return res.status(404).send("React build not found. Run npm run build first.");
+  }
+
+  return res.sendFile(indexPath);
 });
 
 app.use((error, req, res, next) => {

@@ -2,7 +2,7 @@
 
 Student registration CRUD application.
 
-The project uses Node.js, Express, and MongoDB, with a simple web interface to create, edit, delete, and list students.
+The project uses Node.js, Express, MongoDB, React, and Vite, with a simple web interface to create, edit, delete, and list students.
 
 ## Features
 
@@ -60,17 +60,22 @@ The main validations run on the backend to prevent invalid data from being saved
 - MongoDB.
 - Mongoose.
 - Dotenv.
-- Plain HTML, CSS, and JavaScript.
+- React.
+- Vite.
+- CSS.
 - ViaCEP for address lookup.
 
 ## Project Structure
 
 ```text
 studentcrud-poc/
-  public/
-    app.js
+  client/
+    src/
+      App.jsx
+      main.jsx
+      styles.css
     index.html
-    styles.css
+    vite.config.mjs
   src/
     server.js
   .env.example
@@ -116,22 +121,26 @@ studentcrud-poc/
    PORT=3000
    ```
 
-4. Run the application in development mode:
+4. Run the React frontend and Express backend in development mode:
 
    ```bash
    npm run dev
    ```
 
-5. Open it in the browser:
+5. Open the React app in the browser:
 
    ```text
-   http://localhost:3000
+   http://localhost:5173
    ```
 
 ## Scripts
 
-- `npm start`: starts the application.
-- `npm run dev`: starts the application with Node.js watch mode.
+- `npm start`: starts the Express application and serves the React production build.
+- `npm run dev`: starts the Express backend and React/Vite frontend together.
+- `npm run dev:server`: starts only the Express backend.
+- `npm run dev:client`: starts only the React/Vite frontend.
+- `npm run build`: creates the React production build.
+- `npm run preview`: previews the React production build through Vite.
 
 ## API Routes
 
@@ -140,3 +149,18 @@ studentcrud-poc/
 - `POST /api/students`: creates a student.
 - `PUT /api/students/:id`: updates a student.
 - `DELETE /api/students/:id`: deletes a student.
+
+## Production Build
+
+To serve the React app through Express:
+
+```bash
+npm run build
+npm start
+```
+
+Then open:
+
+```text
+http://localhost:3000
+```
