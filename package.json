@@ -1,0 +1,26 @@
+{
+  "name": "studentcrud-poc",
+  "version": "1.0.0",
+  "description": "CRUD de alunos com Node.js, Express e MongoDB.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "crud",
+    "mongodb",
+    "students"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^7.2.0",
+    "mongoose": "^8.9.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
