@@ -11,6 +11,7 @@ The project uses Node.js, Express, MongoDB, React, and Vite, with a simple web i
 - Student editing by clicking a row in the grid.
 - Student deletion with confirmation.
 - Grid listing.
+- Student search by name.
 - The most recently inserted student appears at the top by default.
 - Clickable grid sorting by:
   - Code.

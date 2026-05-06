@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const emptyStudent = {
   id: "",
@@ -35,6 +35,13 @@ function onlyDigits(value) {
 function formatCep(value) {
   const digits = onlyDigits(value).slice(0, 8);
   return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 function toLocalInputDate(date = new Date()) {
@@ -107,6 +114,7 @@ async function requestJson(url, options = {}) {
 }
 
 export default function App() {
+  const formSectionRef = useRef(null);
   const [students, setStudents] = useState([]);
   const [form, setForm] = useState(emptyStudent);
   const [statusOnline, setStatusOnline] = useState(false);
@@ -115,23 +123,47 @@ export default function App() {
   const [lastResolvedCep, setLastResolvedCep] = useState("");
   const [readonlyAddress, setReadonlyAddress] = useState(emptyReadonlyAddress);
   const [activeSort, setActiveSort] = useState({ key: null, direction: null });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formHeight, setFormHeight] = useState(null);
 
   const selectedId = form.id;
   const today = useMemo(() => toLocalInputDate(), []);
 
-  const visibleStudents = useMemo(() => {
-    if (!activeSort.key || !activeSort.direction) {
+  const filteredStudents = useMemo(() => {
+    const query = normalizeText(searchTerm).trim();
+
+    if (!query) {
       return students;
     }
 
-    return [...students].sort((first, second) => {
+    return students.filter((student) => normalizeText(student.nome).includes(query));
+  }, [searchTerm, students]);
+
+  const visibleStudents = useMemo(() => {
+    if (!activeSort.key || !activeSort.direction) {
+      return filteredStudents;
+    }
+
+    return [...filteredStudents].sort((first, second) => {
       const comparison = getSortValue(first, activeSort.key) - getSortValue(second, activeSort.key);
       return activeSort.direction === "asc" ? comparison : -comparison;
     });
-  }, [activeSort, students]);
+  }, [activeSort, filteredStudents]);
 
   useEffect(() => {
     loadStudents();
+  }, []);
+
+  useEffect(() => {
+    const element = formSectionRef.current;
+    if (!element) return undefined;
+
+    const observer = new ResizeObserver(() => {
+      setFormHeight(element.getBoundingClientRect().height);
+    });
+
+    observer.observe(element);
+    return () => observer.disconnect();
   }, []);
 
   function showMessage(text, error = false) {
@@ -380,7 +412,7 @@ export default function App() {
       </header>
 
       <main className="shell">
-        <section className="form-section" aria-labelledby="form-title">
+        <section className="form-section" aria-labelledby="form-title" ref={formSectionRef}>
           <div className="section-heading">
             <div>
               <p className="eyebrow">Formulario</p>
@@ -505,15 +537,31 @@ export default function App() {
           </form>
         </section>
 
-        <section className="grid-section" aria-labelledby="grid-title">
+        <section
+          className="grid-section"
+          aria-labelledby="grid-title"
+          style={formHeight ? { "--grid-panel-height": `${formHeight}px` } : undefined}
+        >
           <div className="section-heading">
             <div>
               <p className="eyebrow">Grid</p>
               <h2 id="grid-title">Alunos cadastrados</h2>
             </div>
-            <span className="count">
-              {students.length} registro{students.length === 1 ? "" : "s"}
-            </span>
+            <div className="grid-actions">
+              <label className="search-field">
+                <span className="sr-only">Pesquisar alunos por nome</span>
+                <input
+                  aria-label="Pesquisar alunos por nome"
+                  placeholder="Pesquisar por nome"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+              </label>
+              <span className="count">
+                {visibleStudents.length} registro{visibleStudents.length === 1 ? "" : "s"}
+              </span>
+            </div>
           </div>
 
           {message.text && (
@@ -533,7 +581,7 @@ export default function App() {
                     indicatorClass={sortIndicatorClass("codigo")}
                     onSort={toggleSort}
                   />
-                  <th>Nome</th>
+                  <HeaderCell label="Nome" />
                   <SortableHeader
                     label="Nascimento"
                     sortKey="dataNascimento"
@@ -541,7 +589,7 @@ export default function App() {
                     indicatorClass={sortIndicatorClass("dataNascimento")}
                     onSort={toggleSort}
                   />
-                  <th>Endereco</th>
+                  <HeaderCell label="Endereco" />
                   <SortableHeader
                     label="Data cadastro"
                     sortKey="dataCadastro"
@@ -556,14 +604,14 @@ export default function App() {
                     indicatorClass={sortIndicatorClass("ultimoUpdate")}
                     onSort={toggleSort}
                   />
-                  <th>Acoes</th>
+                  <HeaderCell label="Acoes" />
                 </tr>
               </thead>
               <tbody>
-                {students.length === 0 ? (
+                {visibleStudents.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="empty">
-                      Nenhum aluno cadastrado.
+                      {searchTerm ? "Nenhum aluno encontrado." : "Nenhum aluno cadastrado."}
                     </td>
                   </tr>
                 ) : (
@@ -621,6 +669,16 @@ function SortableHeader({ label, sortKey, ariaLabel, indicatorClass, onSort }) {
       >
         {label} <span className={indicatorClass}></span>
       </button>
+    </th>
+  );
+}
+
+function HeaderCell({ label }) {
+  return (
+    <th>
+      <span className="th-label">
+        {label} <span className="sort-spacer"></span>
+      </span>
     </th>
   );
 }

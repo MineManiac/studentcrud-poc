@@ -90,6 +90,7 @@ h2 {
 .shell {
   display: grid;
   grid-template-columns: minmax(320px, 410px) minmax(0, 1fr);
+  align-items: start;
   gap: 22px;
   padding: 24px clamp(18px, 4vw, 48px) 40px;
 }
@@ -109,6 +110,9 @@ h2 {
 }
 
 .grid-section {
+  display: flex;
+  flex-direction: column;
+  max-height: var(--grid-panel-height, none);
   padding: 18px 0 0;
   overflow: hidden;
 }
@@ -123,6 +127,32 @@ h2 {
 
 .grid-section .section-heading {
   padding-inline: 18px;
+}
+
+.grid-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 280px;
+}
+
+.search-field {
+  display: block;
+  width: min(320px, 34vw);
+}
+
+.search-field input {
+  min-height: 38px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 form {
@@ -249,7 +279,8 @@ button:disabled {
 }
 
 .table-wrap {
-  max-height: calc(100vh - 190px);
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   border-top: 1px solid var(--line);
 }
@@ -272,6 +303,7 @@ th {
   position: sticky;
   top: 0;
   z-index: 1;
+  height: 48px;
   background: #f9fbfa;
   color: var(--muted);
   font-size: 0.76rem;
@@ -293,23 +325,45 @@ th {
   text-transform: uppercase;
 }
 
+.th-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+}
+
 .sort-button:hover {
   color: var(--accent-dark);
 }
 
-.sort-indicator {
+.sort-indicator,
+.sort-spacer {
   display: inline-block;
-  width: 0;
-  height: 0;
+  width: 8px;
+  height: 8px;
+  flex: none;
+}
+
+.sort-indicator {
+  position: relative;
+}
+
+.sort-indicator.asc::before,
+.sort-indicator.desc::before {
+  position: absolute;
+  left: 0;
+  content: "";
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
 }
 
-.sort-indicator.asc {
+.sort-indicator.asc::before {
+  top: 0;
   border-bottom: 6px solid currentColor;
 }
 
-.sort-indicator.desc {
+.sort-indicator.desc::before {
+  top: 1px;
   border-top: 6px solid currentColor;
 }
 
@@ -348,6 +402,10 @@ tbody tr.selected {
     grid-template-columns: 1fr;
   }
 
+  .grid-section {
+    max-height: none;
+  }
+
   .table-wrap {
     max-height: none;
   }
@@ -357,6 +415,17 @@ tbody tr.selected {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .section-heading,
+  .grid-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .grid-actions,
+  .search-field {
+    width: 100%;
   }
 
   .field-grid {
